@@ -8,7 +8,7 @@ import re
 df = pd.DataFrame()
 data = time.strftime("%Y-%m-%d %H:%M:%S")
 coins = ['bitcoin', 'ethereum', 'tether', 'bnb', 'xrp', 'usd-coin', 'cardano']
-logging.basicConfig(filename="file.log", level=logging.INFO, format='%(asctime)s | %(levelname)s | %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+logging.basicConfig(filename=f"Log_{data.split(' ')[0].replace('-','')}.log", level=logging.INFO, format='%(asctime)s | %(levelname)s | %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
 for index, coin in enumerate(coins):
 
@@ -46,4 +46,4 @@ for index, coin in enumerate(coins):
 
 df.reset_index(inplace=True)
 df.drop('index', axis=1, inplace=True)
-df.to_csv(f"Cotação_{data.split(' ')[0]}.csv", sep=';', encoding='ISO-8859-1')
+df.to_csv(f"Cotação_{data.split(' ')[0]}.csv", sep='\t', encoding='ISO-8859-1')
