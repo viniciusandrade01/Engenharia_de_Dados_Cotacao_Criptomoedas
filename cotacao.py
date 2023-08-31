@@ -4,21 +4,23 @@ import time
 from methods.loaders.filesSave import FileSavers
 from methods.transformers.transformData import TransformData
 from methods.extractors.webPageDataScrapers import WebPageDataScrapers
+from utils.tools import GeneralTools
 import utils.logger_config as logger_config
 import logging
 
 fileSavers = FileSavers()
 transformData = TransformData()
 webPageDataScrapers = WebPageDataScrapers()
-
+generalTools = GeneralTools()
+# Variável contendo informações das moedas a serem coletadas, aws e banco de dados
+jsonData = generalTools.openJson()
 data = time.strftime("%Y-%m-%d %H:%M:%S")
 logger_config.setup_logger(data)
 
 df = pd.DataFrame()
 nameDirectory = f"Moedas_{data.split(' ')[0].replace('-','')}"
-coins = ['bitcoin', 'ethereum', 'tether', 'bnb', 'xrp', 'usd-coin', 'cardano']
 
-for index, coin in enumerate(coins):
+for index, coin in enumerate(jsonData['coins']):
     try:
         logging.info(f"Acessando link referente a moeda {coin}.")
         html, soup = webPageDataScrapers.specificGetRequest(coin)
@@ -28,6 +30,7 @@ for index, coin in enumerate(coins):
         try:
             logging.info(f"Extraindo conteúdo desejado referente a moeda {coin}.")
             aboutCoin, padrao = transformData.extractContent(soup, 'div', 'class', 'sc-16891c57-0 hqcKQB flexStart alignBaseline', coin)
+            #aboutCoin, padrao = transformData.extractContent(soup, 'dd', 'class', 'sc-16891c57-0 fRWxhs base-text', coin)
             logging.info(f"Dados da Moeda: {coin} coletados com sucesso.")
         except AttributeError as attr_err:
             logging.error(f"Erro de Atributo: {attr_err}")
