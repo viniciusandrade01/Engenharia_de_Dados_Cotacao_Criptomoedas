@@ -24,17 +24,17 @@ class WebPageDataScrapers:
         
         return html, soup
     
-    def specificGetRequest(self, coins: str):
+    def specificGetRequest(self, link: str):
         try:
-            html = rq.get(f'https://coinmarketcap.com/pt-br/currencies/{coins}/')
+            html = rq.get(link)
             html.raise_for_status()
             soup = bs4(html.text, 'html.parser')
 
         except rq.exceptions.HTTPError as http_err:
-            logging.error(f"Erro HTTP: {http_err}")
+            logging.error(f"Erro HTTP: {http_err} para moeda {link.split('/')[-1].title()}")
         except rq.exceptions.RequestException as req_err:
-            logging.error(f"Erro de Requisição: {req_err}")
+            logging.error(f"Erro de Requisição: {req_err} para moeda {link.split('/')[-1].title()}")
         except Exception as err:
-            logging.error(f"Erro Desconhecido: {err}")
+            logging.error(f"Erro Desconhecido: {err} para moeda {link.split('/')[-1].title()}")
         
         return html, soup

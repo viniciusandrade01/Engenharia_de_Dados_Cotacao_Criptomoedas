@@ -15,4 +15,24 @@ class GeneralTools:
     def openJson(self):
         with open('utils\data.json') as json_file:
             return json.load(json_file)
-            
+    
+    def hyphenToNull(self, dado: str):
+        return dado.replace('-','')
+    
+    def splitByEmptySpace(self, dado: str):
+        return dado.split(' ')
+    
+    def brlToEmpty(self, dado: str):
+        return dado.replace("R$","")
+    
+    def commaToEmpty(self, dado: str):
+        return dado.replace(",","")
+    
+    def dotToEmpty(self, dado: str):
+        return dado.replace(".","")
+    
+    def emptyValueToEmpty(self, dado: str):
+        return dado.replace (" ","")
+    
+    def percentageToEmpty(self, dado: str):
+        return dado.replace("%","")
