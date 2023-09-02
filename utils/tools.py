@@ -17,10 +17,13 @@ class GeneralTools:
             return json.load(json_file)
     
     def hyphenToNull(self, dado: str):
-        return dado.replace('-','')
+        return dado.replace("-","")
+    
+    def hyphenToEmptySpace(self, dado: str):
+        return dado.replace("-"," ")
     
     def splitByEmptySpace(self, dado: str):
-        return dado.split(' ')
+        return dado.split(" ")
     
     def brlToEmpty(self, dado: str):
         return dado.replace("R$","")

@@ -30,23 +30,26 @@ def main():
             #jsonData['source']['specificLink']['atributos']
             #Continuar daqui, passar no extractContent
             
-            aboutCoin, padrao = transformData.extractContent(soup, 'span', 'class',  'sc-16891c57-0 dxubiK base-text', coin)
-            aboutCoin, padrao = transformData.extractContent(soup, 'div', 'class', 'sc-aef7b723-0 sc-5219c53f-0 hPqPqM', coin)
-            aboutCoin, padrao = transformData.extractContent(soup, 'dd', 'class', 'sc-16891c57-0 fRWxhs base-text', coin)
-            aboutCoin, padrao = transformData.extractContent(soup, 'dd', 'class', 'sc-16891c57-0 fRWxhs base-text', coin)
+            aboutCoin = transformData.extractContent(soup, jsonData['source']['specificLink']['atributos'], coin)
+            #aboutCoin, padrao = transformData.extractContent(soup, jsonData['source']['specificLink']['atributos'], coin)
+            #aboutCoin, padrao = transformData.extractContent(soup, jsonData['source']#['specificLink']['atributos'], coin)
+            #aboutCoin, padrao = transformData.extractContent(soup, jsonData['source']#['specificLink']['atributos'], coin)
+            #aboutCoin, padrao = transformData.extractContent(soup, 'dd', 'class', 'sc-16891c57-0 #fRWxhs base-text', coin)
             
             logging.info(f"Dados da Moeda: {coin} coletados com sucesso.")
 
             logging.info(f"Salvando informações referente a moeda {coin}.")
             dictionary = {
-                'Moeda': coin.replace("-"," ").title(),
-                'Preco': float(aboutCoin[0].replace("R$","").replace(",","").replace(".","").replace (" ","")),
+                'Moeda': generalTools.hyphenToEmptySpace(coin).title(),
+                'Preco': float(generalTools.emptyValueToEmpty(generalTools.dotToEmpty((generalTools.commaToEmpty(generalTools.brlToEmpty(aboutCoin[0])))))),
+                    #float(aboutCoin[0].replace("R$","").replace(",","").replace(".","").replace #(" ","")),
                 'Sigla_Preco': 'BRL',
-                'Data_Captura': data.split(' ')[0],
-                'Hora_Captura': data.split(' ')[1],
-                'Variacao': float(aboutCoin[1].replace("%","")),
-                'Periodo_Qtde': padrao.group(1),
-                'Periodo_Und': padrao.group(2)
+                'Data_Captura': generalTools.splitByEmptySpace(data)[0],
+                'Hora_Captura': generalTools.splitByEmptySpace(data)[1],
+                'Variacao': float(generalTools.percentageToEmpty(aboutCoin[1])),
+                    #float(aboutCoin[1].replace("%","")),
+                #'Periodo_Qtde': padrao.group(1),
+                #'Periodo_Und': padrao.group(2)
             }
             logging.info(f"Informações referente a moeda {coin} salva com sucesso.")
             df = fileSavers.concatDataFrame(df, dictionary, index)
