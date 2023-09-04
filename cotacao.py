@@ -19,49 +19,54 @@ def main():
         data = time.strftime("%Y-%m-%d %H:%M:%S")
         logger_config.setup_logger(data)
         df = pd.DataFrame()
-        nameDirectory = f"Moedas_{generalTools.hyphenToNull(generalTools.splitByEmptySpace(data)[0])}"
-        for index, coin in enumerate(jsonData['coins']):
-            logging.info(f"Acessando link referente a moeda {coin}.")
-            html, soup = webPageDataScrapers.specificGetRequest(f"{jsonData['source']['specificLink']['fonte']}{coin}") if len(jsonData['coins']) != '' else webPageDataScrapers.requestGetDefault(jsonData['source']['generalLink']['fonte'])
-            logging.info(f"Salvando página html referente a moeda {coin}.")
-            fileSavers.saveHTML(html, f"html_{generalTools.hyphenToNull(coin)}_{generalTools.hyphenToNull(generalTools.splitByEmptySpace(data)[0])}.txt", nameDirectory)
-            logging.info(f"Extraindo conteúdo desejado referente a moeda {coin}.")
+        
+        # COMEÇA AQUI A GRANDE FUSÃO
+        
+        if len(jsonData['coins']) == 0:
+            nameDirectory = f"Moedas_{generalTools.hyphenToNull(generalTools.splitByEmptySpace(data)[0])}"
             
-            #jsonData['source']['specificLink']['atributos']
-            #Continuar daqui, passar no extractContent
+            html, soup = webPageDataScrapers.requestGetDefault(jsonData['source']['generalLink']['fonte'])
+            logging.info(f"SALVANDO PÁGINA HTML REFERENTE AS MOEDAS.")
             
-            aboutCoin = transformData.extractContent(soup, jsonData['source']['specificLink']['atributos'], coin)
-            #aboutCoin, padrao = transformData.extractContent(soup, jsonData['source']['specificLink']['atributos'], coin)
-            #aboutCoin, padrao = transformData.extractContent(soup, jsonData['source']#['specificLink']['atributos'], coin)
-            #aboutCoin, padrao = transformData.extractContent(soup, jsonData['source']#['specificLink']['atributos'], coin)
-            #aboutCoin, padrao = transformData.extractContent(soup, 'dd', 'class', 'sc-16891c57-0 #fRWxhs base-text', coin)
+            fileSavers.saveHTML(html, f"html_moedas_{generalTools.hyphenToNull(generalTools.splitByEmptySpace(data)[0])}.txt", nameDirectory)
             
-            logging.info(f"Dados da Moeda: {coin} coletados com sucesso.")
+            logging.info(f"EXTRAINDO CONTEÚDO DESEJADO REFERENTE AS MOEDAS.")
+                
+            aboutCoin = transformData.extractContent(soup, jsonData['source']['generalLink']['atributos'], "GERAL")
+            
+            logging.info(f"DADOS DA MOEDA: {generalTools.upperCase(coin)} COLETADOS COM SUCESSO.")
 
-            logging.info(f"Salvando informações referente a moeda {coin}.")
-            dictionary = {
-                'Moeda': generalTools.hyphenToEmptySpace(coin).title(),
-                'Preco': float(generalTools.emptyValueToEmpty(generalTools.dotToEmpty((generalTools.commaToEmpty(generalTools.brlToEmpty(aboutCoin[0])))))),
-                    #float(aboutCoin[0].replace("R$","").replace(",","").replace(".","").replace #(" ","")),
-                'Sigla_Preco': 'BRL',
-                'Data_Captura': generalTools.splitByEmptySpace(data)[0],
-                'Hora_Captura': generalTools.splitByEmptySpace(data)[1],
-                'Variacao': float(generalTools.percentageToEmpty(aboutCoin[1])),
-                    #float(aboutCoin[1].replace("%","")),
-                #'Periodo_Qtde': padrao.group(1),
-                #'Periodo_Und': padrao.group(2)
-            }
-            logging.info(f"Informações referente a moeda {coin} salva com sucesso.")
+            logging.info(f"SALVANDO INFORMAÇÕES REFERENTE A MOEDA {generalTools.upperCas(coin)}.")
+            dictionary = fileSavers.saveDictionary(coin, aboutCoin, data)
             df = fileSavers.concatDataFrame(df, dictionary, index)
+        else:
+            nameDirectory = f"Moedas_Selecionadas_{generalTools.hyphenToNull(generalTools.splitByEmptySpace(data)[0])}"
+            for index, coin in enumerate(jsonData['coins']):
+                logging.info(f"ACESSANDO LINK REFERENTE A MOEDA {generalTools.upperCase(coin)}.")
+                
+                html, soup = webPageDataScrapers.specificGetRequest(f"{jsonData['source']['specificLink']['fonte']}{coin}")
+                logging.info(f"SALVANDO PÁGINA HTML REFERENTE A MOEDA {generalTools.upperCase(coin)}.")
+            
+                fileSavers.saveHTML(html, f"html_{generalTools.hyphenToNull(coin)}_{generalTools.hyphenToNull(generalTools.splitByEmptySpace(data)[0])}.txt", nameDirectory)
+            
+                logging.info(f"EXTRAINDO CONTEÚDO DESEJADO REFERENTE A MOEDA {generalTools.upperCase(coin)}.")
+                
+                aboutCoin = transformData.extractContent(soup, jsonData['source']['specificLink']['atributos'], coin)
+            
+                logging.info(f"DADOS DA MOEDA: {generalTools.upperCase(coin)} COLETADOS COM SUCESSO.")
 
-        file_name = f"Moedas_{data.split(' ')[0].replace('-','')}"
+                logging.info(f"SALVANDO INFORMAÇÕES REFERENTE A MOEDA {generalTools.upperCase(coin)}.")
+                dictionary = fileSavers.saveDictionary(coin, aboutCoin, data)
+                df = fileSavers.concatDataFrame(df, dictionary, index)
+
+        file_name = f"Cotação_Moedas_{generalTools.hyphenToNull(generalTools.splitByEmptySpace(data)[0])}" if len(jsonData['coins']) == 0 else f"Cotação_Moedas_Selecionadas_{generalTools.hyphenToNull(generalTools.splitByEmptySpace(data)[0])}"
         fileSavers.saveDataFrame(df, file_name, '\t', nameDirectory)
     except FileNotFoundError as err:
-        logging.error(f"Erro: {err}, o arquivo JSON (data.json) não foi encontrado")
+        logging.error(f"ERRO: {generalTools.upperCase(err)}, O ARQUIVO JSON (data.json) NÃO FOI ENCONTRADO.")
     except (rq.exceptions.HTTPError, rq.exceptions.RequestException) as err:
-        logging.error(f"Erro durante a requisição: {err}")
+        logging.error(f"ERRO DURANTE A REQUISIÇÃO: {generalTools.upperCase(err)}")
     except Exception as err:
-        logging.error(f"Erro desconhecido: {err}")
+        logging.error(f"ERRO DESCONHECIDO: {generalTools.upperCase(err)}")
 
 if __name__ == '__main__':
     main()

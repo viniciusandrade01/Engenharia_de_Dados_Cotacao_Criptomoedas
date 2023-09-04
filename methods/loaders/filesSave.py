@@ -38,3 +38,22 @@ class FileSavers:
             logging.error(f"Erro: {e}, a chave {e} não foi encontrada no dicionário.")
         except Exception as e:
             logging.error(f"Erro: {e}, não foi possível concatenar os DataFrames.")
+            
+    def saveDictionary(self, coin: str, aboutCoin: list, data):
+        try:
+            dictionary = {
+                    'Moeda': generalTools.hyphenToEmptySpace(coin).title() if coin != 'GERAL' else aboutCoin[1],
+                    'Sigla_Moeda': aboutCoin[3].split("preço")[1] if coin != 'GERAL' else aboutCoin[2],
+                    'Preco': float(generalTools.commaToEmpty(generalTools.brlToEmpty(aboutCoin[0]))) if coin != 'GERAL' else float(generalTools.commaToEmpty(generalTools.brlToEmpty(aboutCoin[3]))),
+                    'Und_Monetaria': aboutCoin[0][:2] if coin != 'GERAL' else aboutCoin[3][:2],
+                    'Var': float(generalTools.percentageToEmpty(aboutCoin[1])) if coin != 'GERAL' else float(generalTools.percentageToEmpty(aboutCoin[5])),
+                    'Periodo_Var': generalTools.removeParentheses(aboutCoin[2]) if coin != 'GERAL' else '1d',
+                    'Data_Captura': generalTools.splitByEmptySpace(data)[0],
+                    'Hora_Captura': generalTools.splitByEmptySpace(data)[1],
+                    'Fornecimento_Total': float(generalTools.commaToEmpty(generalTools.splitByEmptySpace(aboutCoin[11])[0])) if coin != 'GERAL' else float(generalTools.commaToEmpty(generalTools.brlToEmpty(aboutCoin[14]))),
+                    #'Fornecimento_Max': float(generalTools.commaToEmpty(generalTools.splitByEmptySpace(aboutCoin[12])[0]))
+                }
+            logging.info(f"INFORMAÇÕES REFERENTE A MOEDA {generalTools.upperCase(coin)} SALVA COM SUCESSO.")
+            return dictionary
+        except:
+            logging.error(f"INFORMAÇÕES REFERENTE A MOEDA {generalTools.upperCase(coin)} NÃO FORAM SALVAS.")

@@ -39,3 +39,9 @@ class GeneralTools:
     
     def percentageToEmpty(self, dado: str):
         return dado.replace("%","")
+    
+    def removeParentheses(self, dado: str):
+        return dado.replace("(","").replace(")","")
+    
+    def upperCase(self, dado: str):
+        return dado.upper()

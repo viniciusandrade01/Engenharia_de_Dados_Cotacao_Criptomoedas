@@ -31,10 +31,10 @@ class WebPageDataScrapers:
             soup = bs4(html.text, 'html.parser')
 
         except rq.exceptions.HTTPError as http_err:
-            logging.error(f"Erro HTTP: {http_err} para moeda {link.split('/')[-1].title()}")
+            logging.error(f"ERRO HTTP: {http_err} PARA MOEDA {link.split('/')[-1].title()}")
         except rq.exceptions.RequestException as req_err:
-            logging.error(f"Erro de Requisição: {req_err} para moeda {link.split('/')[-1].title()}")
+            logging.error(f"ERRO DE REQUISIÇÃO: {req_err} PARA MOEDA {link.split('/')[-1].title()}")
         except Exception as err:
-            logging.error(f"Erro Desconhecido: {err} para moeda {link.split('/')[-1].title()}")
+            logging.error(f"ERRO DESCONHECIDO: {err} PARA MOEDA {link.split('/')[-1].title()}")
         
         return html, soup

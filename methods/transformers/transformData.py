@@ -1,33 +1,47 @@
-#import re
+import re
 import time
+import pandas as pd
 import utils.logger_config as logger_config
 import logging
-#from itertools import product
-#from itertools import chain
 logger_config.setup_logger(time.strftime("%Y-%m-%d %H:%M:%S"))
+from utils.tools import GeneralTools
+from methods.loaders.filesSave import FileSavers
+generalTools = GeneralTools()
+fileSavers = FileSavers()
+data = time.strftime("%Y-%m-%d %H:%M:%S")
 
 class TransformData:
     def __init__(self):
-        self.regex = [r'R\$(\d{1,3}(?:,\d{3})*\.\d{2})',
-                        r'(\d+)([A-Za-z]+)',
-                        r'([\d.,]+)%R\$(\d[\d,.]+)'
-        ]
+        self.regex = r'(\d+)([A-Za-z]+)([A-Za-z]{3,4})(R\$\d+,\d+\.\d+)(\d+\.\d+%)(\d+\.\d+%)(\d+\.\d+%)(R\$\d+\.\d+[TB])(R\$(\d{1,3}(?:,\d{3})*,\d+))(R\$(\d{1,3}(?:,\d{3})*,\d{3},\d{3}))(\d{1,3}(?:,\d{3})*)([A-Za-z]{3,4})(\d+(?:,\d+)*)([A-Za-z]{3,4})'
         self.aboutCoin = []
         self.padrao = []
 
     def extractContent(self, html, tags: dict, coin: str):
-        #coinTemp = [(chave_externa, chave_interna, valor) for (chave_externa, chave_interna), #valor in product(tags.items(), key=lambda x: x[1].items())]
-        #coinTemp = [(chave_externa, chave_interna, valor) for chave_externa, dicionario_interno #in tags.items() for chave_interna, valor in dicionario_interno.items()]
-        pares_combinados = [(chave, valor) for chave, valor in tags.items()]
+        self.aboutCoin.clear()
+        df = pd.DataFrame()
         try:
-            #for index, (chave, valor) in enumerate(tags.items()):
             for chave, valor in tags.items():
-                self.aboutCoin.append([item for item in html.find(f'{chave}', attrs={f'class':f'{valor}'}).text.split("\xa0") if item != ''])
-                #coinTemp = self.aboutCoin[-1]
-                #self.aboutCoin.append([item for item in html.find(f'{chave}', attrs={f'class':f'{valor}'}).text if item != ''][0])
-                #self.padrao.append(re.match(self.regex[index], self.aboutCoin[-1]))
+                if isinstance(valor, str):
+                    if coin != 'GERAL':
+                        self.aboutCoin.append([item for item in html.find(f'{chave}', attrs={f'class':f'{valor}'}).text.split("\xa0") if item != ''])
+                    else:
+                        table = html.find(f"{chave}")
+                        table = table.find_all(f"{valor}")
+                        titulos = table[0]
+                        for index, valor in enumerate(table[1:]):
+                            valor = generalTools.emptyValueToEmpty(valor.text).replace("USDt","")
+                            correspondencias = re.search(self.regex, valor)
+                            if correspondencias is None:
+                                continue
+                            self.aboutCoin.extend(correspondencias.groups())
+                            dictionary = fileSavers.saveDictionary(coin, self.aboutCoin, data)
+                            self.aboutCoin.clear()
+                            df = fileSavers.concatDataFrame(df, dictionary, index)
+                        return df
+                else:
+                    for value in valor:
+                        self.aboutCoin.append([item for item in html.find(f'{chave}', attrs={f'class':f'{value}'}).text.split("\xa0") if item != ''])
         except Exception as e:
-            logging.error(f"Erro: {e}, não foi possível encontrar as informações sobre a moeda {coin}.")
+            logging.error(f"ERRO: {e}, NÃO FOI POSSÍVEL ENCONTRAR AS INFORMAÇÕES SOBRE A MOEDA {coin}.")
         
-        #return self.aboutCoin #, self.padrao
         return [item for sublist in self.aboutCoin for item in sublist]
