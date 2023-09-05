@@ -1,4 +1,3 @@
-import re
 import time
 import pandas as pd
 import utils.logger_config as logger_config
@@ -6,13 +5,14 @@ import logging
 logger_config.setup_logger(time.strftime("%Y-%m-%d %H:%M:%S"))
 from utils.tools import GeneralTools
 from methods.loaders.filesSave import FileSavers
+from methods.extractors.webPageDataScrapers import WebPageDataScrapers
 generalTools = GeneralTools()
 fileSavers = FileSavers()
+webPageDataScrapers = WebPageDataScrapers()
 data = time.strftime("%Y-%m-%d %H:%M:%S")
 
 class TransformData:
     def __init__(self):
-        self.regex = r'(\d+)([A-Za-z]+)([A-Za-z]{3,4})(R\$\d+,\d+\.\d+)(\d+\.\d+%)(\d+\.\d+%)(\d+\.\d+%)(R\$\d+\.\d+[TB])(R\$(\d{1,3}(?:,\d{3})*,\d+))(R\$(\d{1,3}(?:,\d{3})*,\d{3},\d{3}))(\d{1,3}(?:,\d{3})*)([A-Za-z]{3,4})(\d+(?:,\d+)*)([A-Za-z]{3,4})'
         self.aboutCoin = []
         self.padrao = []
 
@@ -25,17 +25,11 @@ class TransformData:
                     if coin != 'GERAL':
                         self.aboutCoin.append([item for item in html.find(f'{chave}', attrs={f'class':f'{valor}'}).text.split("\xa0") if item != ''])
                     else:
-                        table = html.find(f"{chave}")
-                        table = table.find_all(f"{valor}")
-                        titulos = table[0]
-                        for index, valor in enumerate(table[1:]):
-                            valor = generalTools.emptyValueToEmpty(valor.text).replace("USDt","")
-                            correspondencias = re.search(self.regex, valor)
-                            if correspondencias is None:
-                                continue
-                            self.aboutCoin.extend(correspondencias.groups())
-                            dictionary = fileSavers.saveDictionary(coin, self.aboutCoin, data)
-                            self.aboutCoin.clear()
+                        response, responsejson = webPageDataScrapers.requestGetApi(tags['base_url'], tags['endpoint'], tags['params'], tags['headers'])
+                        self.aboutCoin.clear()
+                        for index, valor in enumerate(responsejson['data']):
+                            #self.aboutCoin.append(valor)
+                            dictionary = fileSavers.saveDictionary(coin, valor, data)
                             df = fileSavers.concatDataFrame(df, dictionary, index)
                         return df
                 else:

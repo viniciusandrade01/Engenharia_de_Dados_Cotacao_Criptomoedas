@@ -9,6 +9,19 @@ class WebPageDataScrapers:
     def __init__(self):
         pass
 
+    def requestGetApi(self, link: str, endpoint: str, params: dict, headers: dict):
+        try:
+            response = rq.get(f'{link}{endpoint}', params=params, headers=headers)
+            data = response.json()
+        except rq.exceptions.HTTPError as http_err:
+            logging.error(f"Erro HTTP: {http_err}")
+        except rq.exceptions.RequestException as req_err:
+            logging.error(f"Erro de Requisição: {req_err}")
+        except Exception as err:
+            logging.error(f"Erro Desconhecido: {err}")
+            
+        return response, data
+
     def requestGetDefault(self, link: str):
         try:
             html = rq.get(link)

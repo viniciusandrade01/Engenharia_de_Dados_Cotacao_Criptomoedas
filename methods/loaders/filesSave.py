@@ -27,30 +27,30 @@ class FileSavers:
             df.drop('index', axis=1, inplace=True)
             df.to_csv(os.path.join(nameDirectory, file_name), sep=f'{sep}', encoding='ISO-8859-1', index=False)
         except FileNotFoundError as e:
-            logging.error(f"Erro: {e}, o arquivo {file_name} não existe.")
+            logging.error(f"ERRO: {e}, O ARQUIVO {file_name} NÃO EXISTE.")
         except Exception as e:
-            logging.error(f"Erro: {e}, não foi possível salvar o DataFrame.")
+            logging.error(f"ERRO: {e}, NÃO FOI POSSÍVEL SALVAR O DATAFRAME.")
         
     def concatDataFrame(self, df: pd.DataFrame, dictionary: dict, index: int):
         try:
             return pd.concat([df, pd.DataFrame(dictionary, index=[index])])
         except KeyError as e:
-            logging.error(f"Erro: {e}, a chave {e} não foi encontrada no dicionário.")
+            logging.error(f"ERRO: {e}, A CHAVE {e} NÃO FOI ENCONTRADA NO DICIONÁRIO.")
         except Exception as e:
-            logging.error(f"Erro: {e}, não foi possível concatenar os DataFrames.")
+            logging.error(f"ERRO: {e}, NÃO FOI POSSÍVEL CONCATENAR OS DATAFRAMES.")
             
-    def saveDictionary(self, coin: str, aboutCoin: list, data):
+    def saveDictionary(self, coin: str, aboutCoin: [list, dict], data):
         try:
             dictionary = {
-                    'Moeda': generalTools.hyphenToEmptySpace(coin).title() if coin != 'GERAL' else aboutCoin[1],
-                    'Sigla_Moeda': aboutCoin[3].split("preço")[1] if coin != 'GERAL' else aboutCoin[2],
-                    'Preco': float(generalTools.commaToEmpty(generalTools.brlToEmpty(aboutCoin[0]))) if coin != 'GERAL' else float(generalTools.commaToEmpty(generalTools.brlToEmpty(aboutCoin[3]))),
-                    'Und_Monetaria': aboutCoin[0][:2] if coin != 'GERAL' else aboutCoin[3][:2],
-                    'Var': float(generalTools.percentageToEmpty(aboutCoin[1])) if coin != 'GERAL' else float(generalTools.percentageToEmpty(aboutCoin[5])),
+                    'Moeda': generalTools.hyphenToEmptySpace(coin).title() if coin != 'GERAL' else aboutCoin['name'],
+                    'Sigla_Moeda': aboutCoin[3].split("preço")[1] if coin != 'GERAL' else aboutCoin['symbol'],
+                    'Preco': float(generalTools.commaToEmpty(generalTools.brlToEmpty(aboutCoin[0]))) if coin != 'GERAL' else round(aboutCoin['quote']['BRL']['price'], 2),
+                    'Und_Monetaria': aboutCoin[0][:2] if coin != 'GERAL' else 'BRL',
+                    'Var': float(generalTools.percentageToEmpty(aboutCoin[1])) if coin != 'GERAL' else round(aboutCoin['quote']['BRL']['percent_change_24h'], 2),
                     'Periodo_Var': generalTools.removeParentheses(aboutCoin[2]) if coin != 'GERAL' else '1d',
                     'Data_Captura': generalTools.splitByEmptySpace(data)[0],
                     'Hora_Captura': generalTools.splitByEmptySpace(data)[1],
-                    'Fornecimento_Total': float(generalTools.commaToEmpty(generalTools.splitByEmptySpace(aboutCoin[11])[0])) if coin != 'GERAL' else float(generalTools.commaToEmpty(generalTools.brlToEmpty(aboutCoin[14]))),
+                    'Fornecimento_Total': float(generalTools.commaToEmpty(generalTools.splitByEmptySpace(aboutCoin[11])[0])) if coin != 'GERAL' else round(aboutCoin['total_supply'], 2),
                     #'Fornecimento_Max': float(generalTools.commaToEmpty(generalTools.splitByEmptySpace(aboutCoin[12])[0]))
                 }
             logging.info(f"INFORMAÇÕES REFERENTE A MOEDA {generalTools.upperCase(coin)} SALVA COM SUCESSO.")

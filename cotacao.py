@@ -20,8 +20,6 @@ def main():
         logger_config.setup_logger(data)
         df = pd.DataFrame()
         
-        # COMEÇA AQUI A GRANDE FUSÃO
-        
         if len(jsonData['coins']) == 0:
             nameDirectory = f"Moedas_{generalTools.hyphenToNull(generalTools.splitByEmptySpace(data)[0])}"
             
@@ -31,14 +29,10 @@ def main():
             fileSavers.saveHTML(html, f"html_moedas_{generalTools.hyphenToNull(generalTools.splitByEmptySpace(data)[0])}.txt", nameDirectory)
             
             logging.info(f"EXTRAINDO CONTEÚDO DESEJADO REFERENTE AS MOEDAS.")
-                
-            aboutCoin = transformData.extractContent(soup, jsonData['source']['generalLink']['atributos'], "GERAL")
-            
-            logging.info(f"DADOS DA MOEDA: {generalTools.upperCase(coin)} COLETADOS COM SUCESSO.")
 
-            logging.info(f"SALVANDO INFORMAÇÕES REFERENTE A MOEDA {generalTools.upperCas(coin)}.")
-            dictionary = fileSavers.saveDictionary(coin, aboutCoin, data)
-            df = fileSavers.concatDataFrame(df, dictionary, index)
+            df = transformData.extractContent(soup, jsonData['source']['generalLink'], "GERAL")
+            
+            logging.info(f"DADOS DAS MOEDAS, COM BOM RANKING, COLETADOS COM SUCESSO.")
         else:
             nameDirectory = f"Moedas_Selecionadas_{generalTools.hyphenToNull(generalTools.splitByEmptySpace(data)[0])}"
             for index, coin in enumerate(jsonData['coins']):
